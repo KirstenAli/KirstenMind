@@ -8,6 +8,7 @@ public class FeedForwardNetwork {
     private final int inputDim;
     private final int hiddenDim;
     private INDArray W1, W2, b1, b2;
+    private INDArray hidden, activatedHidden; // Cache for forward pass values
 
     public FeedForwardNetwork(int inputDim, int hiddenDim) {
         this.inputDim = inputDim;
@@ -19,16 +20,18 @@ public class FeedForwardNetwork {
     }
 
     public INDArray forward(INDArray input) {
-        INDArray hidden = input.mmul(W1).addRowVector(b1);
-        hidden = Transforms.relu(hidden); // ReLU activation
-        return hidden.mmul(W2).addRowVector(b2);
+        hidden = input.mmul(W1).addRowVector(b1);
+        activatedHidden = Transforms.relu(hidden); // ReLU activation
+        return activatedHidden.mmul(W2).addRowVector(b2);
     }
 
     public void backward(INDArray input, INDArray gradOutput, double learningRate) {
         INDArray gradHidden = gradOutput.mmul(W2.transpose());
-        gradHidden = gradHidden.mul(Transforms.relu(input.mmul(W1).addRowVector(b1), true));
 
-        INDArray gradW2 = input.transpose().mmul(gradOutput);
+        INDArray reluGrad = hidden.gt(0);
+        gradHidden = gradHidden.mul(reluGrad);
+
+        INDArray gradW2 = activatedHidden.transpose().mmul(gradOutput);
         INDArray gradb2 = gradOutput.sum(0);
 
         INDArray gradW1 = input.transpose().mmul(gradHidden);
@@ -40,3 +43,5 @@ public class FeedForwardNetwork {
         b2.subi(gradb2.mul(learningRate));
     }
 }
+
+
