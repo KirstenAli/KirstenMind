@@ -10,9 +10,9 @@ public class SelfAttention {
 
     public SelfAttention(int embeddingSize) {
         this.embeddingSize = embeddingSize;
-        this.Wq = Nd4j.rand(embeddingSize, embeddingSize);
-        this.Wk = Nd4j.rand(embeddingSize, embeddingSize);
-        this.Wv = Nd4j.rand(embeddingSize, embeddingSize);
+        this.Wq = Nd4j.randn(embeddingSize, embeddingSize).muli(Math.sqrt(2.0 / embeddingSize));
+        this.Wk = Nd4j.randn(embeddingSize, embeddingSize).muli(Math.sqrt(2.0 / embeddingSize));
+        this.Wv = Nd4j.randn(embeddingSize, embeddingSize).muli(Math.sqrt(2.0 / embeddingSize));
     }
 
     public INDArray applySelfAttention(INDArray embeddingsMatrix) {
@@ -51,5 +51,4 @@ public class SelfAttention {
         Wk.subi(gradWk.mul(learningRate));
         Wv.subi(gradWv.mul(learningRate));
     }
-
 }
