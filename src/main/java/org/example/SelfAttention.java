@@ -15,9 +15,7 @@ public class SelfAttention {
         this.Wv = Nd4j.rand(embeddingSize, embeddingSize);
     }
 
-    public INDArray applySelfAttention(double[][] embeddings) {
-        INDArray embeddingsMatrix = Nd4j.create(embeddings);
-
+    public INDArray applySelfAttention(INDArray embeddingsMatrix) {
         INDArray Q = embeddingsMatrix.mmul(Wq);
         INDArray K = embeddingsMatrix.mmul(Wk);
         INDArray V = embeddingsMatrix.mmul(Wv);
@@ -32,7 +30,29 @@ public class SelfAttention {
         return attentionWeights.mmul(V);
     }
 
-    public INDArray generateAnswer(INDArray contextVectors, INDArray questionVectors) {
-        return null;
+    public void backward(INDArray input, INDArray gradOutput, double learningRate) {
+        INDArray Q = input.mmul(Wq);
+        INDArray K = input.mmul(Wk);
+        INDArray V = input.mmul(Wv);
+
+        INDArray attentionScores = Q.mmul(K.transpose());
+        double scale = Math.sqrt(embeddingSize);
+        attentionScores = attentionScores.div(scale);
+
+        INDArray attentionWeights = Nd4j.nn().softmax(attentionScores, 1);
+
+        INDArray gradAttentionWeights = gradOutput.mmul(V.transpose());
+        INDArray gradV = attentionWeights.transpose().mmul(gradOutput);
+
+        INDArray gradQ = gradAttentionWeights.mmul(K);
+        INDArray gradK = gradAttentionWeights.transpose().mmul(Q);
+
+        INDArray gradWq = input.transpose().mmul(gradQ);
+        INDArray gradWk = input.transpose().mmul(gradK);
+        INDArray gradWv = input.transpose().mmul(gradV);
+
+        Wq.subi(gradWq.mul(learningRate));
+        Wk.subi(gradWk.mul(learningRate));
+        Wv.subi(gradWv.mul(learningRate));
     }
 }
