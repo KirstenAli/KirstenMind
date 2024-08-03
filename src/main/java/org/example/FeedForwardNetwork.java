@@ -13,7 +13,7 @@ public class FeedForwardNetwork {
     public FeedForwardNetwork(int inputDim, int hiddenDim) {
         this.inputDim = inputDim;
         this.hiddenDim = hiddenDim;
-        // Use Xavier initialization for weights
+
         this.W1 = Nd4j.randn(inputDim, hiddenDim).muli(Math.sqrt(2.0 / inputDim));
         this.W2 = Nd4j.randn(hiddenDim, inputDim).muli(Math.sqrt(2.0 / hiddenDim));
         this.b1 = Nd4j.zeros(1, hiddenDim);
