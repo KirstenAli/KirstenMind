@@ -8,15 +8,16 @@ public class FeedForwardNetwork {
     private final int inputDim;
     private final int hiddenDim;
     private INDArray W1, W2, b1, b2;
-    private INDArray hidden, activatedHidden; // Cache for forward pass values
+    private INDArray hidden, activatedHidden;
 
     public FeedForwardNetwork(int inputDim, int hiddenDim) {
         this.inputDim = inputDim;
         this.hiddenDim = hiddenDim;
-        this.W1 = Nd4j.rand(inputDim, hiddenDim);
-        this.W2 = Nd4j.rand(hiddenDim, inputDim);
-        this.b1 = Nd4j.rand(1, hiddenDim);
-        this.b2 = Nd4j.rand(1, inputDim);
+        // Use Xavier initialization for weights
+        this.W1 = Nd4j.randn(inputDim, hiddenDim).muli(Math.sqrt(2.0 / inputDim));
+        this.W2 = Nd4j.randn(hiddenDim, inputDim).muli(Math.sqrt(2.0 / hiddenDim));
+        this.b1 = Nd4j.zeros(1, hiddenDim);
+        this.b2 = Nd4j.zeros(1, inputDim);
     }
 
     public INDArray forward(INDArray input) {
@@ -26,13 +27,13 @@ public class FeedForwardNetwork {
     }
 
     public void backward(INDArray input, INDArray gradOutput, double learningRate) {
+        INDArray gradW2 = activatedHidden.transpose().mmul(gradOutput);
+        INDArray gradb2 = gradOutput.sum(0);
+
         INDArray gradHidden = gradOutput.mmul(W2.transpose());
 
         INDArray reluGrad = hidden.gt(0);
         gradHidden = gradHidden.mul(reluGrad);
-
-        INDArray gradW2 = activatedHidden.transpose().mmul(gradOutput);
-        INDArray gradb2 = gradOutput.sum(0);
 
         INDArray gradW1 = input.transpose().mmul(gradHidden);
         INDArray gradb1 = gradHidden.sum(0);
@@ -43,5 +44,3 @@ public class FeedForwardNetwork {
         b2.subi(gradb2.mul(learningRate));
     }
 }
-
-

@@ -41,7 +41,7 @@ public class SelfAttention {
         gradAttentionScores = gradAttentionScores.div(Math.sqrt(embeddingSize));
 
         INDArray gradQ = gradAttentionScores.mmul(K);
-        INDArray gradK = gradAttentionScores.transpose().mmul(Q);
+        INDArray gradK = gradAttentionScores.transpose().mmul(input);
 
         INDArray gradWq = input.transpose().mmul(gradQ);
         INDArray gradWk = input.transpose().mmul(gradK);
@@ -51,4 +51,5 @@ public class SelfAttention {
         Wk.subi(gradWk.mul(learningRate));
         Wv.subi(gradWv.mul(learningRate));
     }
+
 }
