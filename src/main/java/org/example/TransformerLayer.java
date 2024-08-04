@@ -26,11 +26,7 @@ public class TransformerLayer {
     }
 
     public void backward(INDArray input, INDArray gradOutput, double learningRate) {
-        INDArray ffnGradOutput = gradOutput;
-        ffn.backward(input, ffnGradOutput, learningRate);
-
-        INDArray attentionGradOutput = ffnGradOutput;
-        selfAttention.backward(input, attentionGradOutput, learningRate);
+        //TODO
     }
 
     public SelfAttention getSelfAttention() {
